@@ -15,11 +15,13 @@ import static nju.passport.FileUtils.generateFileName;
 import static nju.passport.UploadUtils.*;
 
 
+
 /**
  * 文件上传服务
  */
 @Service
 public class FileService {
+
 
     @Autowired
     private FileDao fileService;
@@ -42,8 +44,9 @@ public class FileService {
         file1.setPath(path);
         file1.setUploadTime(new Date());
         fileService.save(file1);
+        ocrService.getResult(path);
 
-        System.out.println(ocrService.getResult(path)+"???????");
+
 
     }
 
@@ -73,8 +76,11 @@ public class FileService {
             file1.setPath(UploadConfig.path + fileName);
             file1.setUploadTime(new Date());
             fileService.save(file1);
+
         }
     }
+
+
 
     /**
      * 检查Md5判断文件是否已上传
