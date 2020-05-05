@@ -36,7 +36,7 @@ public class FileService {
     public void upload(String name,
                        String md5,
                        MultipartFile file) throws IOException {
-        String path = UploadConfig.path + generateFileName() + ".jpg";
+        String path = UploadConfig.path + name ;
         FileUtils.write(path, file.getInputStream());
         File file1 = new File();
         file1.setName(name);
