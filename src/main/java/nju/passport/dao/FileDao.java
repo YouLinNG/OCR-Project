@@ -13,4 +13,6 @@ public interface FileDao extends JpaRepository<File,String> {
     File getById(Long id);
 
     File getByMd5(String md5);
+
+    File getByName(String name);
 }

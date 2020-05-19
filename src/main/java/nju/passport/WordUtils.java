@@ -360,8 +360,8 @@ public class WordUtils {
         String str3 = "wws";
         String str4 = "wangws";
         String str5 = "wangwens";
-        String str6 = "wenshengwang";
-        String str7 = "amxl";
+        String str6 = "yangxiuyuan";
+        String str7 = "yangxiusp";
 
         List<String> strings = Arrays.asList(str, str1, str2, str3, str4, str5, str6, str7);
 
