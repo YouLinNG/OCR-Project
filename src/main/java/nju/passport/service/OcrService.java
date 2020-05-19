@@ -1,5 +1,7 @@
 package nju.passport.service;
 
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.util.Base64;
 import com.recognition.software.jdeskew.ImageDeskew;
 import io.netty.handler.codec.base64.Base64Encoder;
@@ -11,6 +13,7 @@ import nju.passport.ImageViewer;
 import nju.passport.config.UploadConfig;
 import nju.passport.model.CutPhoto;
 import nju.passport.model.Photo;
+import org.apache.pdfbox.jbig2.Bitmap;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -55,6 +58,17 @@ public class OcrService {
 
     }
 
+
+    public static BufferedImage sharpen(BufferedImage image) {
+        float[] elements = { 0.0f, -1.0f, 0.0f, -1.0f, 5.0f, -1.0f, 0.0f, -1.0f, 0, 0f };
+        BufferedImage bimg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Kernel kernel = new Kernel(3, 3, elements);
+        ConvolveOp cop = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+
+        cop.filter(image, bimg);
+        return bimg;
+    }
+
     public String[] getResult(String path) {
 
         ITesseract tesseract = new Tesseract();
@@ -80,7 +94,13 @@ public class OcrService {
 
 //            BufferedImage textImage = ImageHelper.convertImageToGrayscale(ImageHelper.getSubImage(bi, 0, 0, bi.getWidth(), bi.getHeight()));
 
+
+
+
+
             bi = ImageHelper.convertImageToGrayscale(bi);
+
+            bi = sharpen(bi);
 //            bi = ImageHelper.convertImageToBinary(bi);
 
             bi = ImageHelper.getScaledInstance(bi, bi.getWidth() * 2, bi.getHeight() * 1);
@@ -278,7 +298,7 @@ public class OcrService {
 
             Photo photo = new Photo();
 
-            if(ocr[1].contains("F")){
+            if(ocr[1].contains("F")||ocr[1].contains("P")){
                 photo.setSex("F");
             }else{
                 photo.setSex("M");
@@ -287,6 +307,7 @@ public class OcrService {
             System.out.println(ocr[0]);
             System.out.println(ocr[1]);
             String passnum = ocr[1].substring(0,8);
+
             photo.setPassnum(passnum);
 
             String nameline = ocr[0];
@@ -295,6 +316,11 @@ public class OcrService {
             String ming = namesplit[1];
 
             photo.setName(ming+"/"+xing);
+
+            String birthdate = ocr[1].substring(13,18);
+            photo.setBirth(birthdate);
+
+
             res.add(photo);
         }
 

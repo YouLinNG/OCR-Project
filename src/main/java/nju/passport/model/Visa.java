@@ -1,23 +1,15 @@
 package nju.passport.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
 /**
  * Created with IDEA
  * author:yanghaolin
- * Date:2020/5/5
- * Time:22:51
+ * Date:2020/5/19
+ * Time:14:20
  * Description：
  */
-@Entity(name = "photo")
-public class Photo {
+public class Visa {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private boolean exist;
 
     private String name;
 
@@ -27,6 +19,13 @@ public class Photo {
 
     private String passnum;
 
+    public boolean isExist() {
+        return exist;
+    }
+
+    public void setExist(boolean exist) {
+        this.exist = exist;
+    }
 
     public String getName() {
         return name;
