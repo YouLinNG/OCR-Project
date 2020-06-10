@@ -2,6 +2,7 @@ package nju.passport.controller;
 
 import nju.passport.model.CutPhoto;
 import nju.passport.model.Photo;
+import nju.passport.service.CutService;
 import nju.passport.service.FileService;
 import nju.passport.service.OcrService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,16 +29,14 @@ import java.util.List;
 public class CutController {
 
     @Autowired
-    private FileService fileService;
-    @Autowired
-    private OcrService ocrService;
+    private CutService cutService;
 
     @RequestMapping(value = "/Photo")
 
     public List<CutPhoto> getResult(@RequestParam(value = "file") List<String> names) throws IOException {
 
 
-        List<CutPhoto> cutPhoto = ocrService.getCutPhoto(names);
+        List<CutPhoto> cutPhoto = cutService.getCutPhoto(names);
 
 
 

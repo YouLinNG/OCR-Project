@@ -44,7 +44,6 @@ public class FileService {
         file1.setPath(path);
         file1.setUploadTime(new Date());
         fileService.save(file1);
-        ocrService.getResult(path);
 
 
 

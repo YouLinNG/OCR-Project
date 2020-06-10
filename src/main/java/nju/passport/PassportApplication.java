@@ -11,4 +11,5 @@ public class PassportApplication {
         SpringApplication.run(PassportApplication.class, args);
     }
 
+
 }
