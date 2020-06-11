@@ -21,7 +21,7 @@ public class WordUtils {
     static String[] ym = {"a", "o", "e", "i", "u", "v", "ai", "ei", "ui", "ao", "ou", "iu", "ie", "ve", "er", "an", "en", "in", "un", "vn", "ang", "eng", "ing", "ong"};
 
     // 整体连读
-    static String[] zt = {"zhi", "chi", "shi", "ri", "wu", "yu", "ye", "yue", "yuan", "yin", "yun", "ying"};
+    static String[] zt = {"zhi", "chi", "shi", "ri", "wu", "yu", "ye", "yue", "yuan", "yin", "yun", "ying","lyu"};
 
     // 声母韵母
     static String[] smym = {"a", "o", "e", "ai", "ei", "ao", "ou", "er", "an", "en", "ang", "eng"};
@@ -98,7 +98,8 @@ public class WordUtils {
     /**
      * @Description: 3.是否全是拼音 全拼 (最难判断 考虑性能这里要)
      */
-    private static Boolean isPYQPWord(String word) {
+    public static Boolean isPYQPWord(String word) {
+        word = word.toLowerCase();
         Boolean isCNWord = false;
         // 所有字符拆开
         String[] split = word.split("");
@@ -116,7 +117,6 @@ public class WordUtils {
 
     // 递归
     // true是全拼， false不是全拼， null 拼音加简写
-    // 如果用户先输入简拼 在输入 拼音 认定为 简拼（这里是考虑到实际场景中 不会有用户 输完简拼在输入全拼）
     private static Boolean recursionFindWordPinYin(String[] split, int i) {
         Boolean isPinYin = null;
         String wordFind = "";
@@ -129,12 +129,7 @@ public class WordUtils {
         } else {
             int nextI = lengPinYin(wordFind);
             if (nextI == -1) {
-                // 之前存在拼音这里返回null 标识 这是 拼音加简拼
-                if (i > 0) {
-                    return null;
-                } else {
-                    return false;
-                }
+                return false;
             } else if (nextI == wordFind.length() && split.length == (nextI + i)) {
                 return true;
             } else {
@@ -354,41 +349,19 @@ public class WordUtils {
 
 
     public static void main(String[] args) {
-        String str = "王文胜";
-        String str1 = "王wensehng";
-        String str2 = "wang文胜";
-        String str3 = "wws";
-        String str4 = "wangws";
-        String str5 = "wangwens";
-        String str6 = "yangxiuyuan";
-        String str7 = "yangxiusp";
+        String str = "WANGGENGGEN";
+        String str1 = "yangxiuyuam";
+        String str2 = "yangxiuy";
 
-        List<String> strings = Arrays.asList(str, str1, str2, str3, str4, str5, str6, str7);
+
+        List<String> strings = Arrays.asList(str, str1, str2);
 
         strings.forEach(word -> {
             // 1.纯中文 2.纯拼音全拼 3.纯拼音缩写 4.全拼+简拼 5.中文+拼音
             long million = System.currentTimeMillis();
             int i = discernWordType(word);
-            switch (i) {
-                case 1:
-                    System.err.println(word + ":纯中文");
-                    break;
-                case 2:
-                    System.err.println(word + ":纯拼音全拼");
-                    break;
-                case 3:
-                    System.err.println(word + ":纯拼音缩写");
-                    break;
-                case 4:
-                    System.err.println(word + ":全拼+简拼");
-                    break;
-                case 5:
-                    System.err.println(word + ":中文+拼音");
-                    break;
-                default:
-                    System.err.println(word + ":未知类型");
-                    break;
-            }
+            if(isPYQPWord(word)) System.out.println(word+"符合拼音规则");
+            else System.err.println(word+"不符合拼音规则");
 
         });
     }
