@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IDEA
@@ -16,6 +17,6 @@ import java.util.Date;
 @Repository
 public interface PhotoDao extends JpaRepository<Photo,String> {
 
-    Photo findByBirthBetween(Date from, Date to);
+    List<Photo> findByInsertDateBetween(Date from, Date to);
 
 }
