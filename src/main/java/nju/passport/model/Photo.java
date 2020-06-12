@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.Date;
 
 /**
  * Created with IDEA
@@ -27,6 +28,15 @@ public class Photo {
 
     private String passnum;
 
+    private Date insertDate;
+
+    public Date getInsertDate() {
+        return insertDate;
+    }
+
+    public void setInsertDate(Date insertDate) {
+        this.insertDate = insertDate;
+    }
 
     public String getName() {
         return name;

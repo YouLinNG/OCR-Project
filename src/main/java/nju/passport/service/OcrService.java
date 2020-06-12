@@ -11,13 +11,16 @@ import net.sourceforge.tess4j.TesseractException;
 import net.sourceforge.tess4j.util.ImageHelper;
 import nju.passport.*;
 import nju.passport.config.UploadConfig;
+import nju.passport.dao.PhotoDao;
 import nju.passport.model.CutPhoto;
 import nju.passport.model.Photo;
+import nju.passport.model.Visa;
 import org.apache.pdfbox.jbig2.Bitmap;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -43,6 +47,9 @@ public class OcrService {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
     }
+
+    @Autowired
+    private PhotoDao photoDao;
 
     public String[] getResult(String path) {
 
@@ -326,7 +333,99 @@ public class OcrService {
                 photo.setName(null);
             }
 
+            Photo photo1 = new Photo();
+            photo1.setBirth(photo.getBirth());
+            photo1.setName(photo.getName());
+            photo1.setPassnum(photo.getPassnum());
+            photo1.setSex(photo.getSex());
+            photo1.setInsertDate(new Date());
+            photoDao.save(photo1);
 
+
+
+            res.add(photo);
+        }
+
+
+        return res;
+    }
+
+
+    public List<Visa> getVisaOcrResult(List<String> names) {
+        List<Visa> res = new ArrayList<>();
+
+        for (String name : names) {
+
+            String path = UploadConfig.path + name;
+
+            String[] ocr = getResult(path);
+
+            Visa photo = new Visa();
+
+            if (ocr[1].length() >= 21) {
+                if (ocr[1].charAt(20) == 'F' || ocr[1].charAt(20) == 'P') {
+                    photo.setSex("F");
+                } else {
+                    photo.setSex("M");
+                }
+            } else {
+                photo.setSex(null);
+            }
+            String passnum = null;
+            String birthdate = null;
+            if (ocr[1].length() >= 9) {
+                if (ocr[1].contains("CHN")) {
+                    String[] numAndBirth = ocr[1].split("CHN");
+                    if (numAndBirth[0].length() >= 10) {
+                        passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10, numAndBirth[0].length() - 1);
+                    } else passnum = numAndBirth[0];
+                    birthdate = numAndBirth[1].substring(0, 6);
+                    photo.setBirth(birthdate);
+
+                } else if (ocr[1].contains("0HN")) {
+                    String[] numAndBirth = ocr[1].split("0HN");
+                    passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10, numAndBirth[0].length() - 1);
+                    birthdate = numAndBirth[1].substring(0, 6);
+                    photo.setBirth(birthdate);
+
+                } else {
+                    passnum = ocr[1].substring(0, 9);
+                    if (ocr[1].length() >= 19) {
+                        birthdate = ocr[1].substring(13, 19);
+                        photo.setBirth(birthdate);
+                    } else photo.setBirth(null);
+                }
+
+                if (PassnumUtils.judgePassport(passnum))
+                    photo.setPassnum(passnum);
+                else photo.setPassnum(passnum + "(wrong)");
+            } else photo.setPassnum(null);
+
+            String nameline = ocr[0];
+            String[] namesplit = nameline.split("<<");
+            String xing = null;
+            String ming = null;
+            if (namesplit.length > 1) {
+                if (namesplit[0].contains("CHN")) {
+                    String[] namesplit2 = namesplit[0].split("CHN");
+                    xing = namesplit2[1];
+                    ming = namesplit[1];
+                } else {
+                    xing = namesplit[0].substring(5);
+                    ming = namesplit[1];
+                }
+                if (WordUtils.isPYQPWord(xing + ming))
+                    photo.setName(ming + "/" + xing);
+                else photo.setName(ming + "/" + xing + "(wrong)");
+            } else {
+                photo.setName(null);
+            }
+
+            Visa photo1 = new Visa();
+            photo1.setBirth(photo.getBirth());
+            photo1.setName(photo.getName());
+            photo1.setPassnum(photo.getPassnum());
+            photo1.setSex(photo.getSex());
 
 
             res.add(photo);
