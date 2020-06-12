@@ -9,10 +9,7 @@ import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import net.sourceforge.tess4j.util.ImageHelper;
-import nju.passport.ImageViewer;
-import nju.passport.PassnumUtils;
-import nju.passport.SharpenUtils;
-import nju.passport.WordUtils;
+import nju.passport.*;
 import nju.passport.config.UploadConfig;
 import nju.passport.dao.PhotoDao;
 import nju.passport.model.CutPhoto;
@@ -119,6 +116,72 @@ public class OcrService {
         return null;
     }
 
+    public String getVisaResult(String path) {
+
+        ITesseract tesseract = new Tesseract();
+        File file = new File(path);
+        String lagnguagePath = "D:\\Tesseract-OCR\\tessdata";
+//
+//        //System.out.println(System.getenv("TESSDATA_PREFIX"));
+//
+//        tesseract.setDatapath(System.getenv("TESSDATA_PREFIX"));
+//        System.out.println(file.getPath());
+//        System.out.println(file.getName());
+        tesseract.setDatapath(lagnguagePath);
+        tesseract.setLanguage("visa");
+
+
+        try {
+
+            long startTime = System.currentTimeMillis();
+
+            BufferedImage bi = ImageIO.read(file);
+            ImageDeskew id = new ImageDeskew(bi);
+
+
+//            BufferedImage textImage = ImageHelper.convertImageToGrayscale(ImageHelper.getSubImage(bi, 0, 0, bi.getWidth(), bi.getHeight()));
+
+
+
+
+
+            bi = VisaUtils.visaHandle(bi);
+            bi = ImageHelper.convertImageToGrayscale(bi);
+
+//            bi = SharpenUtils.sharpen(bi);
+//            String tmp = "D:\\outpng.png";
+//            File out12 = new File(tmp);
+//            ImageIO.write(bi,"png",out12);
+
+//            bi = ImageHelper.convertImageToBinary(bi);
+
+            bi = ImageHelper.getScaledInstance(bi, bi.getWidth() * 2, bi.getHeight() * 1);
+
+            double imageSkewAngle = id.getSkewAngle(); // determine skew angle
+
+            if ((imageSkewAngle > 0.05 || imageSkewAngle < -(0.05))) {
+//                textImage = ImageHelper.rotateImage(textImage, -imageSkewAngle); // deskew image
+            }
+
+            String result = tesseract.doOCR(bi);
+            System.out.println(result);
+
+            return result;
+
+        } catch (TesseractException e) {
+            e.printStackTrace();
+        } catch (
+                IOException io) {
+            io.printStackTrace();
+        }
+
+
+
+//        System.out.println(ocrService.getResult(path)+"???????");
+
+        return null;
+    }
+
 
     public static String[] extractLastLine(String input) {
         String [] res = new String[2];
@@ -144,25 +207,6 @@ public class OcrService {
         return res;
     }
 
-    public static void imageCut(String imagePath,String outFile, int posX,int posY,int width,int height ) {
-        //原始图像
-        Mat image = Imgcodecs.imread(imagePath);
-        //截取的区域：参数,坐标X,坐标Y,截图宽度,截图长度
-        Rect rect = new Rect(posX, posY, width, height);
-        //两句效果一样
-        Mat sub = image.submat(rect);   //Mat sub = new Mat(image,rect);
-        Mat mat = new Mat();
-        Size size = new Size(300, 300);
-        Imgproc.resize(sub, mat, size);//将人脸进行截图并保存
-        String[] paths = imagePath.split("/");
-        String name = paths[2];
-
-        Imgcodecs.imwrite(UploadConfig.path + "HEAD_"+ name , mat);
-//        ImageViewer imageViewer = new ImageViewer(mat, "照片");
-//        imageViewer.imshow();
-//        Imgcodecs.imwrite(outFile, mat);
-//        System.out.println(String.format("图片裁切成功，裁切后图片文件为： %s", outFile));
-    }
 
     public  String imageToBase64ByLocal(String path)  {
         InputStream in = null;
@@ -188,23 +232,6 @@ public class OcrService {
         return encode;
     }
 
-    public List<CutPhoto> getCutPhoto(List<String> names){
-
-        List<CutPhoto> res = new ArrayList<>();
-        for(String name : names) {
-            String path = UploadConfig.path + name ;
-
-            String[] ocr = getResult(path);
-
-            String data = imageToBase64ByLocal(path);
-
-            CutPhoto cutPhoto = new CutPhoto();
-            cutPhoto.setPassnum(ocr[1].substring(0, 8));
-            cutPhoto.setBase64(data);
-            res.add(cutPhoto);
-        }
-        return res;
-    }
 
 
     public List<Photo> getOcrResult(List<String> names) {
@@ -230,6 +257,7 @@ public class OcrService {
             }
             String passnum = null;
             String birthdate = null;
+            String birth = null;
             if(ocr[1].length()>= 9) {
                 if(ocr[1].contains("CHN")){
                     String[] numAndBirth = ocr[1].split("CHN");
@@ -238,21 +266,41 @@ public class OcrService {
                     }
                     else passnum = numAndBirth[0];
                     birthdate = numAndBirth[1].substring(0,6);
-                    photo.setBirth(birthdate);
+                    try {
+                        int year =Integer.parseInt(birthdate.substring(0,2));
+                        if(year <= 20) birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"20"+birthdate.substring(0,2);
+                        else birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"19"+birthdate.substring(0,2);
+                    } catch (NumberFormatException e) {
+                        birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"19"+birthdate.substring(0,2);
+                    }
+                    photo.setBirth(birth);
 
                 }
                 else if(ocr[1].contains("0HN")){
                     String[] numAndBirth = ocr[1].split("0HN");
                     passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10,numAndBirth[0].length() - 1);
                     birthdate = numAndBirth[1].substring(0,6);
-                    photo.setBirth(birthdate);
-
+                    try {
+                        int year =Integer.parseInt(birthdate.substring(0,2));
+                        if(year <= 20) birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"20"+birthdate.substring(0,2);
+                        else birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"19"+birthdate.substring(0,2);
+                    } catch (NumberFormatException e) {
+                        birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"19"+birthdate.substring(0,2);
+                    }
+                    photo.setBirth(birth);
                 }
                else {
                     passnum = ocr[1].substring(0, 9);
                     if(ocr[1].length()>=19) {
                         birthdate = ocr[1].substring(13, 19);
-                        photo.setBirth(birthdate);
+                        try {
+                            int year =Integer.parseInt(birthdate.substring(0,2));
+                            if(year <= 20) birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"20"+birthdate.substring(0,2);
+                            else birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"19"+birthdate.substring(0,2);
+                        } catch (NumberFormatException e) {
+                            birth = birthdate.substring(4,6)+"/"+birthdate.substring(2,4)+"/"+"19"+birthdate.substring(0,2);
+                        }
+                        photo.setBirth(birth);
                     }
                     else photo.setBirth(null);
                 }
@@ -278,8 +326,8 @@ public class OcrService {
                     ming = namesplit[1];
                 }
                 if(WordUtils.isPYQPWord(xing+ming))
-                    photo.setName(ming+"/"+xing);
-                else photo.setName(ming+"/"+xing+"(wrong)");
+                    photo.setName(xing+ming);
+                else photo.setName(xing+ming+"(wrong)");
             }
             else {
                 photo.setName(null);
