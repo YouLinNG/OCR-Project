@@ -335,10 +335,22 @@ public class OcrService {
 
             Photo photo1 = new Photo();
             photo1.setBirth(photo.getBirth());
-            photo1.setName(photo.getName());
-            photo1.setPassnum(photo.getPassnum());
+            if(photo.getName().contains("(wrong)")){
+                photo1.setName(photo.getName().substring(0,photo.getName().length() - 7));
+            }
+            else photo1.setName(photo.getName());
+            if(photo.getPassnum().contains("(wrong)")){
+                photo1.setPassnum(photo.getPassnum().substring(0,photo.getPassnum().length() - 7));
+            }
+            else photo1.setPassnum(photo.getPassnum());
             photo1.setSex(photo.getSex());
             photo1.setInsertDate(new Date());
+            List<Photo> photoList = photoDao.findAll();
+            for(int i = 0; i < photoList.size(); i ++) {
+                if(photoList.get(i).getPassnum().equals(photo1.getPassnum())) {
+                    photoDao.delete(photoList.get(i));
+                }
+            }
             photoDao.save(photo1);
 
 
@@ -350,89 +362,5 @@ public class OcrService {
         return res;
     }
 
-
-    public List<Visa> getVisaOcrResult(List<String> names) {
-        List<Visa> res = new ArrayList<>();
-
-        for (String name : names) {
-
-            String path = UploadConfig.path + name;
-
-            String[] ocr = getResult(path);
-
-            Visa photo = new Visa();
-
-            if (ocr[1].length() >= 21) {
-                if (ocr[1].charAt(20) == 'F' || ocr[1].charAt(20) == 'P') {
-                    photo.setSex("F");
-                } else {
-                    photo.setSex("M");
-                }
-            } else {
-                photo.setSex(null);
-            }
-            String passnum = null;
-            String birthdate = null;
-            if (ocr[1].length() >= 9) {
-                if (ocr[1].contains("CHN")) {
-                    String[] numAndBirth = ocr[1].split("CHN");
-                    if (numAndBirth[0].length() >= 10) {
-                        passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10, numAndBirth[0].length() - 1);
-                    } else passnum = numAndBirth[0];
-                    birthdate = numAndBirth[1].substring(0, 6);
-                    photo.setBirth(birthdate);
-
-                } else if (ocr[1].contains("0HN")) {
-                    String[] numAndBirth = ocr[1].split("0HN");
-                    passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10, numAndBirth[0].length() - 1);
-                    birthdate = numAndBirth[1].substring(0, 6);
-                    photo.setBirth(birthdate);
-
-                } else {
-                    passnum = ocr[1].substring(0, 9);
-                    if (ocr[1].length() >= 19) {
-                        birthdate = ocr[1].substring(13, 19);
-                        photo.setBirth(birthdate);
-                    } else photo.setBirth(null);
-                }
-
-                if (PassnumUtils.judgePassport(passnum))
-                    photo.setPassnum(passnum);
-                else photo.setPassnum(passnum + "(wrong)");
-            } else photo.setPassnum(null);
-
-            String nameline = ocr[0];
-            String[] namesplit = nameline.split("<<");
-            String xing = null;
-            String ming = null;
-            if (namesplit.length > 1) {
-                if (namesplit[0].contains("CHN")) {
-                    String[] namesplit2 = namesplit[0].split("CHN");
-                    xing = namesplit2[1];
-                    ming = namesplit[1];
-                } else {
-                    xing = namesplit[0].substring(5);
-                    ming = namesplit[1];
-                }
-                if (WordUtils.isPYQPWord(xing + ming))
-                    photo.setName(ming + "/" + xing);
-                else photo.setName(ming + "/" + xing + "(wrong)");
-            } else {
-                photo.setName(null);
-            }
-
-            Visa photo1 = new Visa();
-            photo1.setBirth(photo.getBirth());
-            photo1.setName(photo.getName());
-            photo1.setPassnum(photo.getPassnum());
-            photo1.setSex(photo.getSex());
-
-
-            res.add(photo);
-        }
-
-
-        return res;
-    }
 }
 
