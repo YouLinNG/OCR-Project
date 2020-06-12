@@ -1,5 +1,10 @@
 package nju.passport.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 /**
  * Created with IDEA
  * author:yanghaolin
@@ -7,17 +12,19 @@ package nju.passport.model;
  * Time:14:20
  * Description：
  */
+@Entity(name = "visa")
 public class Visa {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     private boolean exist;
 
-    private String name;
+    private boolean nameExist;
 
-    private String sex;
+    private boolean birthExist;
 
-    private String birth;
-
-    private String passnum;
+    private String imageName;
 
     public boolean isExist() {
         return exist;
@@ -27,35 +34,27 @@ public class Visa {
         this.exist = exist;
     }
 
-    public String getName() {
-        return name;
+    public boolean isBirthExist() {
+        return birthExist;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public boolean isNameExist() {
+        return nameExist;
     }
 
-    public String getSex() {
-        return sex;
+    public void setBirthExist(boolean birthExist) {
+        this.birthExist = birthExist;
     }
 
-    public void setSex(String sex) {
-        this.sex = sex;
+    public void setNameExist(boolean nameExist) {
+        this.nameExist = nameExist;
     }
 
-    public String getBirth() {
-        return birth;
+    public String getImageName() {
+        return imageName;
     }
 
-    public void setBirth(String birth) {
-        this.birth = birth;
-    }
-
-    public String getPassnum() {
-        return passnum;
-    }
-
-    public void setPassnum(String passnum) {
-        this.passnum = passnum;
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 }

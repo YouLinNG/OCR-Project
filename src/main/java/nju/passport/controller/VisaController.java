@@ -55,4 +55,16 @@ public class VisaController {
 
         return res;
     }
+
+    @RequestMapping(value = "/Unmatched")
+
+    public List<String> getUnmatched() throws IOException {
+
+
+        List<String> res = visaService.getUnmatchedPhotos();
+
+
+
+        return res;
+    }
 }

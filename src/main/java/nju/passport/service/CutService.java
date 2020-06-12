@@ -1,5 +1,6 @@
 package nju.passport.service;
 
+import nju.passport.PassnumUtils;
 import nju.passport.config.UploadConfig;
 import nju.passport.model.CutPhoto;
 import org.opencv.core.*;
@@ -119,14 +120,36 @@ public class CutService {
 
         List<CutPhoto> res = new ArrayList<>();
         for(String name : names) {
+
             String path = UploadConfig.path + name ;
+            identify(path);
 
             String[] ocr = ocrService.getResult(path);
 
             String data = imageToBase64ByLocal(path);
 
             CutPhoto cutPhoto = new CutPhoto();
-            cutPhoto.setPassnum(ocr[1].substring(0, 8));
+            String passnum = null;
+            if(ocr[1].length()>= 9) {
+                if(ocr[1].contains("CHN")){
+                    String[] numAndBirth = ocr[1].split("CHN");
+                    if(numAndBirth[0].length()>=10) {
+                        passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10, numAndBirth[0].length() - 1);
+                    }
+                    else passnum = numAndBirth[0];
+                }
+                else if(ocr[1].contains("0HN")){
+                    String[] numAndBirth = ocr[1].split("0HN");
+                    passnum = numAndBirth[0].substring(numAndBirth[0].length() - 10,numAndBirth[0].length() - 1);
+                }
+                else {
+                    passnum = ocr[1].substring(0, 9);
+
+                }
+                cutPhoto.setPassnum(passnum);
+
+            }
+            else cutPhoto.setPassnum("无法识别");
             cutPhoto.setBase64(data);
             res.add(cutPhoto);
         }
