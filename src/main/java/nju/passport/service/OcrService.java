@@ -335,10 +335,22 @@ public class OcrService {
 
             Photo photo1 = new Photo();
             photo1.setBirth(photo.getBirth());
-            photo1.setName(photo.getName());
-            photo1.setPassnum(photo.getPassnum());
+            if(photo.getName().contains("(wrong)")){
+                photo1.setName(photo.getName().substring(0,photo.getName().length() - 7));
+            }
+            else photo1.setName(photo.getName());
+            if(photo.getPassnum().contains("(wrong)")){
+                photo1.setPassnum(photo.getPassnum().substring(0,photo.getPassnum().length() - 7));
+            }
+            else photo1.setPassnum(photo.getPassnum());
             photo1.setSex(photo.getSex());
             photo1.setInsertDate(new Date());
+            List<Photo> photoList = photoDao.findAll();
+            for(int i = 0; i < photoList.size(); i ++) {
+                if(photoList.get(i).getPassnum().equals(photo1.getPassnum())) {
+                    photoDao.delete(photoList.get(i));
+                }
+            }
             photoDao.save(photo1);
 
 
@@ -349,7 +361,6 @@ public class OcrService {
 
         return res;
     }
-
 
 }
 
