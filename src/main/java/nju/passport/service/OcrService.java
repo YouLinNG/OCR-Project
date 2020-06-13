@@ -334,21 +334,29 @@ public class OcrService {
             }
 
             Photo photo1 = new Photo();
-            photo1.setBirth(photo.getBirth());
-            if(photo.getName().contains("(wrong)")){
-                photo1.setName(photo.getName().substring(0,photo.getName().length() - 7));
+            if(photo.getBirth() != null) photo1.setBirth(photo.getBirth());
+            else photo1.setBirth(null);
+            if(photo.getName() != null) {
+                if (photo.getName().contains("(wrong)")) {
+                    photo1.setName(photo.getName().substring(0, photo.getName().length() - 7));
+                } else photo1.setName(photo.getName());
             }
-            else photo1.setName(photo.getName());
-            if(photo.getPassnum().contains("(wrong)")){
-                photo1.setPassnum(photo.getPassnum().substring(0,photo.getPassnum().length() - 7));
+            else photo1.setName(null);
+            if(photo.getPassnum() != null) {
+                if (photo.getPassnum().contains("(wrong)")) {
+                    photo1.setPassnum(photo.getPassnum().substring(0, photo.getPassnum().length() - 7));
+                } else photo1.setPassnum(photo.getPassnum());
             }
-            else photo1.setPassnum(photo.getPassnum());
-            photo1.setSex(photo.getSex());
+            else photo1.setPassnum(null);
+            if(photo.getSex() != null) photo1.setSex(photo.getSex());
+            else photo1.setSex(null);
             photo1.setInsertDate(new Date());
             List<Photo> photoList = photoDao.findAll();
             for(int i = 0; i < photoList.size(); i ++) {
-                if(photoList.get(i).getPassnum().equals(photo1.getPassnum())) {
-                    photoDao.delete(photoList.get(i));
+                if(photoList.get(i).getPassnum() != null) {
+                    if (photoList.get(i).getPassnum().equals(photo1.getPassnum())) {
+                        photoDao.delete(photoList.get(i));
+                    }
                 }
             }
             photoDao.save(photo1);

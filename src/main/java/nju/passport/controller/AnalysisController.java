@@ -72,25 +72,33 @@ public class AnalysisController {
         List<Photo> photos = photoDao.findAll();
         for (Photo photo : photos) {
             String birth = photo.getBirth();
-            String year = birth.split("/")[2];
-            if (Integer.parseInt(year) < 1950) {
-                temp.put("1950前", temp.getOrDefault("1950前", 0) + 1);
+            String year = "";
+            if(birth != null) year = birth.split("/")[2];
+            else continue;
+            try {
+                int yearInt = Integer.parseInt(year);
+                if (yearInt < 1950) {
+                    temp.put("1950前", temp.getOrDefault("1950前", 0) + 1);
+                }
+                if (yearInt >= 1960 && yearInt <= 1969) {
+                    temp.put("1960-1969", temp.getOrDefault("1960-1969", 0) + 1);
+                }
+                if (yearInt >= 1970 && yearInt <= 1979) {
+                    temp.put("1970-1979", temp.getOrDefault("1970-1979", 0) + 1);
+                }
+                if (yearInt >= 1980 && yearInt <= 1989) {
+                    temp.put("1980-1989", temp.getOrDefault("1980-1989", 0) + 1);
+                }
+                if (yearInt >= 1990 && yearInt <= 1999) {
+                    temp.put("1990-1999", temp.getOrDefault("1990-1999", 0) + 1);
+                }
+                if (yearInt >= 2000) {
+                    temp.put("2000后", temp.getOrDefault("2000后", 0) + 1);
+                }
+            } catch (NumberFormatException e) {
+                continue;
             }
-            if (Integer.parseInt(year) > 1960 && Integer.parseInt(year) < 1969) {
-                temp.put("1960-1969", temp.getOrDefault("1960-1969", 0) + 1);
-            }
-            if (Integer.parseInt(year) > 1970 && Integer.parseInt(year) < 1979) {
-                temp.put("1970-1979", temp.getOrDefault("1970-1979", 0) + 1);
-            }
-            if (Integer.parseInt(year) > 1980 && Integer.parseInt(year) < 1989) {
-                temp.put("1980-1989", temp.getOrDefault("1980-1989", 0) + 1);
-            }
-            if (Integer.parseInt(year) > 1990 && Integer.parseInt(year) < 1999) {
-                temp.put("1990-1999", temp.getOrDefault("1990-1999", 0) + 1);
-            }
-            if (Integer.parseInt(year) > 2000) {
-                temp.put("2000前", temp.getOrDefault("2000后", 0) + 1);
-            }
+
         }
 
         Year year1 = new Year();
@@ -109,8 +117,8 @@ public class AnalysisController {
         year5.setItem("1990-1999");
         year5.setCount(temp.getOrDefault("1990-1999",0));res.add(year5);
         Year year6 = new Year();
-        year6.setItem("2000前");
-        year6.setCount(temp.getOrDefault("2000前",0));res.add(year6);
+        year6.setItem("2000后");
+        year6.setCount(temp.getOrDefault("2000后",0));res.add(year6);
 
         return res;
 
