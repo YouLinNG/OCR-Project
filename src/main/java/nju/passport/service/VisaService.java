@@ -72,24 +72,32 @@ public class VisaService {
                 if (strs[index - 1].length() >= 6) {
                     strs[index - 1] = strs[index - 1].replaceAll(" ", "");
                     for (int i = 0; i < allPhotos.size(); i++) {
-                        if (strs[index].contains(allPhotos.get(i).getBirth())) {
-                            visa.setBirthExist(true);
-                            if (strs[index - 1].contains(allPhotos.get(i).getName())) {
-                                visa.setNameExist(true);
-                                visa.setExist(true);
-                                break;
+                        if(allPhotos.get(i).getBirth() != null) {
+                            if (strs[index].contains(allPhotos.get(i).getBirth())) {
+                                visa.setBirthExist(true);
+                                if(allPhotos.get(i).getName() != null) {
+                                    if (strs[index - 1].contains(allPhotos.get(i).getName())) {
+                                        visa.setNameExist(true);
+                                        visa.setExist(true);
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
                 } else {
                     strs[index - 2] = strs[index - 2].replaceAll(" ", "");
                     for (int i = 0; i < allPhotos.size(); i++) {
-                        if (strs[index].contains(allPhotos.get(i).getBirth())) {
-                            visa.setBirthExist(true);
-                            if (strs[index - 2].contains(allPhotos.get(i).getName())) {
-                                visa.setNameExist(true);
-                                visa.setExist(true);
-                                break;
+                        if(allPhotos.get(i).getBirth() != null) {
+                            if (strs[index].contains(allPhotos.get(i).getBirth())) {
+                                visa.setBirthExist(true);
+                                if(allPhotos.get(i).getName() != null) {
+                                    if (strs[index - 2].contains(allPhotos.get(i).getName())) {
+                                        visa.setNameExist(true);
+                                        visa.setExist(true);
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
